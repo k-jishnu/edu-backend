@@ -3,6 +3,8 @@ import traceback
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from dotenv import load_dotenv
+app = Flask(__name__)
+CORS(app)
 
 def generate_real_image(prompt, scene_text, output_path):
     import requests
@@ -189,9 +191,7 @@ def generate_topic_visual(prompt, scene_text, scene_number, output_path):
     img.save(output_path)
 
 
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 
-app = Flask(__name__)
 CORS(app)
 
 OUTPUTS_DIR = os.path.join(os.path.dirname(__file__), 'outputs')
@@ -378,7 +378,7 @@ Now generate for the given topic."""
             try:
                 with Image.open(img_path) as PIL_img:
                     temp_img = PIL_img.convert("RGB")
-                    temp_img = temp_img.resize((1280, 720))
+                    temp_img = temp_img.resized((1280, 720))
                     temp_img.save(img_path, format="PNG")
                     mode = temp_img.mode
                     dims = temp_img.size
@@ -451,7 +451,7 @@ Now generate for the given topic."""
             clips = []
 
             for image_path in image_paths:
-                clip = ImageClip(image_path).set_duration(scene_duration)
+                clip = ImageClip(image_path).with_duration(scene_duration)
                 clips.append(clip)
 
             print(f"Logs: number of clips: {len(clips)}")
@@ -459,7 +459,7 @@ Now generate for the given topic."""
             final_clip = concatenate_videoclips(clips, method="compose")
 
             if audio_path:
-                final_clip = final_clip.set_audio(AudioFileClip(audio_path))
+                final_clip = final_clip.with_audio(AudioFileClip(audio_path))
 
             print(f"Logs: final video duration: {final_clip.duration if hasattr(final_clip, 'duration') else audio_duration} seconds")
 
